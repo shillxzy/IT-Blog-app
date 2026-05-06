@@ -1,0 +1,39 @@
+# залежності
+node_modules/
+
+# лог файли
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# середовище (секрети)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# build / production
+dist/
+build/
+
+# кеш
+.cache/
+.parcel-cache/
+.eslintcache
+
+# IDE / редактори
+.vscode/
+.idea/
+
+# OS файли
+.DS_Store
+Thumbs.db
+
+# coverage (тести)
+coverage/
+
+# TypeScript (якщо є)
+*.tsbuildinfo
