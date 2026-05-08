@@ -3,13 +3,11 @@ const app = express();
 
 app.use(express.json());
 
-// SEO / health check (ВАЖЛИВО)
+const articlesRoutes = require('./routes/articles.routes');
+app.use('/api/articles', articlesRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 module.exports = app;
-
-const articlesRoutes = require('./routes/articles.routes');
-
-app.use('/api', articlesRoutes);
