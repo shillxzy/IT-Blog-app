@@ -22,6 +22,7 @@ export default function RootLayout({
             </Link>
             <nav className="site-nav">
               <Link href="/">Головна</Link>
+              <Link href="/about">Про нас</Link>
               <Link href="/search">Пошук</Link>
               <Link href="/admin">Адмінка</Link>
             </nav>
