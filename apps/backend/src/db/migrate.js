@@ -1,5 +1,4 @@
 // src/db/migrate.js
-// Запуск: node src/db/migrate.js
 require('dotenv').config();
 const { Pool } = require('pg');
 const fs = require('fs');
@@ -28,7 +27,11 @@ async function migrate() {
   await pool.end();
 }
 
-migrate().catch((err) => {
-  console.error('❌ Migration failed:', err.message);
-  process.exit(1);
-});
+migrate()
+  .then(() => {
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error('❌ Migration failed:', err.message);
+    process.exit(1);
+  });
