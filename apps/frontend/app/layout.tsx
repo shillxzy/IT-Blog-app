@@ -10,8 +10,10 @@ export const metadata: Metadata = {
   },
   description:
     "Актуальні статті про JavaScript, React, Node.js, DevOps та AI для розробників.",
+  verification: {
+    google: "google-site-verification=abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567",
+  },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
