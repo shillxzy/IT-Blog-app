@@ -253,3 +253,47 @@ img {
 .article-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 3rem; }
 .tag-badge { background: #f5f5f4; color: #57534e; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.875rem; }
 .tag-badge:hover { background: #e7e5e4; text-decoration: none; }
+
+/* ── Home Page (Silo Hub) ── */
+.home-hero { margin-bottom: 2.5rem; }
+.home-hero-title { font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem; }
+.home-hero-subtitle { font-size: 1.1rem; color: #78716c; margin: 0; }
+
+.silo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 3rem; }
+.silo-card { background: #fff; border: 1px solid #e7e5e4; border-radius: 1rem; padding: 1.5rem; text-decoration: none; color: inherit; transition: box-shadow 0.2s, transform 0.2s; display: block; position: relative; overflow: hidden; }
+.silo-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.silo-card:hover { box-shadow: 0 8px 16px -4px rgba(0,0,0,0.1); transform: translateY(-2px); text-decoration: none; }
+.silo-card-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem; color: #1c1917; }
+.silo-card-desc { font-size: 0.9rem; color: #78716c; margin: 0 0 0.75rem; }
+.silo-card-count { font-size: 0.8rem; color: #a8a29e; font-weight: 500; }
+
+.home-section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.25rem; }
+
+.latest-articles { display: flex; flex-direction: column; gap: 1rem; }
+.latest-article-item { background: #fff; border: 1px solid #e7e5e4; border-radius: 0.75rem; padding: 1.25rem; transition: box-shadow 0.2s; }
+.latest-article-item:hover { box-shadow: 0 4px 8px -2px rgba(0,0,0,0.08); }
+.latest-article-category { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; display: inline-block; }
+.latest-article-title { font-size: 1.1rem; font-weight: 600; margin: 0 0 0.35rem; }
+.latest-article-title a { color: #1c1917; }
+.latest-article-title a:hover { color: #d97706; text-decoration: none; }
+.latest-article-excerpt { font-size: 0.875rem; color: #78716c; margin: 0 0 0.5rem; }
+.latest-article-meta { font-size: 0.75rem; color: #a8a29e; display: flex; gap: 0.75rem; align-items: center; }
+
+/* ── Breadcrumbs ── */
+.breadcrumbs { background: transparent; border: none; padding: 0; margin-bottom: 1.5rem; }
+.breadcrumbs ol { list-style: none; padding: 0; margin: 0; display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+.breadcrumbs li { font-size: 0.875rem; color: #78716c; }
+.breadcrumbs li + li::before { content: "›"; margin: 0 0.5rem; color: #d6d3d1; }
+.breadcrumbs a { color: #78716c; }
+.breadcrumbs a:hover { color: #d97706; text-decoration: none; }
+.breadcrumbs .breadcrumb-current { color: #1c1917; font-weight: 500; }
+
+/* ── Related Articles ── */
+.related-section { margin-top: 3rem; border-top: 1px solid #e7e5e4; padding-top: 2rem; }
+.related-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+.related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.related-card { background: #fff; border: 1px solid #e7e5e4; border-radius: 0.75rem; padding: 1.25rem; transition: box-shadow 0.2s; text-decoration: none; color: inherit; display: block; }
+.related-card:hover { box-shadow: 0 4px 8px -2px rgba(0,0,0,0.08); text-decoration: none; }
+.related-card-title { font-size: 1rem; font-weight: 600; margin: 0 0 0.35rem; color: #1c1917; }
+.related-card-excerpt { font-size: 0.8rem; color: #78716c; margin: 0 0 0.5rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.related-card-date { font-size: 0.75rem; color: #a8a29e; }

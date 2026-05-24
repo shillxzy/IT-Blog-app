@@ -1,50 +1,42 @@
 // ============================================================
-// app/tags/[slug]/page.tsx — Tag feed page (ISR)
+// app/tags/[slug]/page.tsx — Tag Feed Page (Level 3 Auxiliary)
 // ============================================================
 
-import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { getTagBySlug, getArticles, getAllTagSlugs } from "@/lib/api";
-import { absoluteUrl } from "@/lib/utils";
-import { ArticleCardComponent } from "@/components/blog/ArticleCardComponent";
-import { Pagination } from "@/components/ui/Pagination";
-import { Hash } from "lucide-react";
-
-export const revalidate = 3600;
-
-interface TagPageProps {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ page?: string }>;
-}
+import { formatDate } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { Clock } from "lucide-react";
+import type { Metadata } from "next";
 
 export async function generateStaticParams() {
   const slugs = await getAllTagSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({
-  params,
-}: TagPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  let tag;
   try {
-    tag = await getTagBySlug(slug);
+    const tag = await getTagBySlug(slug);
+    return {
+      title: `#${tag.name} — IT-Blog`,
+      description: `Статті з тегом ${tag.name}`,
+    };
   } catch {
-    return { title: "Тег не знайдений" };
+    return { title: "Тег не знайдено" };
   }
-
-  return {
-    title: `#${tag.name} — YourBlog`,
-    description: `Статті з тегом «${tag.name}» на YourBlog`,
-    alternates: { canonical: absoluteUrl(`/tags/${slug}`) },
-  };
 }
 
-export default async function TagPage({ params, searchParams }: TagPageProps) {
+export default async function TagPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ page?: string }>;
+}) {
   const { slug } = await params;
-  const { page: pageStr } = await searchParams;
-  const page = Number(pageStr ?? "1");
+  const { page: rawPage } = await searchParams;
 
   let tag;
   try {
@@ -53,50 +45,68 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
     notFound();
   }
 
+  const currentPage = Math.max(1, Number(rawPage) || 1);
   const { data: articles, meta } = await getArticles({
     tagSlug: slug,
-    page,
+    page: currentPage,
     limit: 12,
     status: "published",
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Tag header */}
-      <header className="mb-10">
-        <div className="inline-flex items-center gap-2 bg-stone-100 text-stone-600 px-4 py-2 rounded-full mb-4">
-          <Hash size={16} className="text-stone-400" />
-          <span className="text-sm font-semibold uppercase tracking-wider">
-            Тег
-          </span>
-        </div>
+    <div>
+      {/* Breadcrumb */}
+      <Breadcrumbs items={[{ label: "Теги", href: "#" }, { label: `#${tag.name}` }]} />
 
-        <h1 className="font-display text-4xl font-bold text-stone-900 mb-2">
-          #{tag.name}
-        </h1>
+      <section>
+        <h1>#{tag.name}</h1>
+        <p>Статті з тегом «{tag.name}»</p>
+      </section>
 
-        <p className="text-sm text-stone-400">
-          {tag.articlesCount} статей з цим тегом
-        </p>
-      </header>
-
-      {/* Articles */}
-      {articles.length === 0 ? (
-        <div className="text-center py-24 text-stone-400">
-          <p>Статей з цим тегом не знайдено</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div style={{ marginTop: "1rem" }}>
+        {articles.length === 0 ? (
+          <section>
+            <p>Статей із цим тегом поки немає.</p>
+          </section>
+        ) : (
+          <div className="latest-articles">
             {articles.map((article) => (
-              <ArticleCardComponent key={article.id} article={article} />
+              <div key={article.id} className="latest-article-item">
+                <Link
+                  href={`/categories/${article.category.slug}`}
+                  className="latest-article-category"
+                  style={{ color: article.category.color || "#0369a1" }}
+                >
+                  {article.category.name}
+                </Link>
+                <p className="latest-article-title">
+                  <Link href={`/articles/${article.slug}`}>{article.title}</Link>
+                </p>
+                <p className="latest-article-excerpt">{article.excerpt}</p>
+                <div className="latest-article-meta">
+                  {article.publishedAt && (
+                    <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
+                  )}
+                  <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                    <Clock size={12} /> {article.readingTime} хв
+                  </span>
+                </div>
+              </div>
             ))}
           </div>
-          <Suspense>
-            <Pagination meta={meta} />
-          </Suspense>
-        </>
-      )}
+        )}
+
+        {/* Pagination */}
+        {meta.totalPages > 1 && (
+          <nav aria-label="Pagination" style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1.5rem", padding: "0.75rem" }}>
+            {meta.hasPrev && <Link href={`/tags/${slug}?page=${currentPage - 1}`}>← Назад</Link>}
+            <span style={{ fontSize: "0.875rem", color: "#78716c" }}>
+              Сторінка {meta.page} з {meta.totalPages}
+            </span>
+            {meta.hasNext && <Link href={`/tags/${slug}?page=${currentPage + 1}`}>Далі →</Link>}
+          </nav>
+        )}
+      </div>
     </div>
   );
 }

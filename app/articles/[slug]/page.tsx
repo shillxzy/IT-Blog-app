@@ -1,8 +1,14 @@
+// ============================================================
+// app/articles/[slug]/page.tsx — Article Page (Silo Level 2)
+// ============================================================
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { getArticleBySlug, getAllArticleSlugs } from "@/lib/api";
+import { getArticleBySlug, getAllArticleSlugs, getRelatedArticles } from "@/lib/api";
 import { AuthorBlock } from "@/components/ui/AuthorBlock";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { RelatedArticles } from "@/components/ui/RelatedArticles";
 import type { Metadata } from "next";
 
 export async function generateStaticParams() {
@@ -29,7 +35,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  
+
   let article;
   try {
     article = await getArticleBySlug(slug);
@@ -37,8 +43,19 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
     notFound();
   }
 
+  // Fetch related articles from the same silo (category)
+  const relatedArticles = await getRelatedArticles(article.id, article.category.id);
+
   return (
     <article style={{ maxWidth: "800px", margin: "2rem auto", padding: "0 1.5rem" }}>
+      {/* Breadcrumb — silo navigation */}
+      <Breadcrumbs
+        items={[
+          { label: article.category.name, href: `/categories/${article.category.slug}` },
+          { label: article.title },
+        ]}
+      />
+
       <header className="article-header">
         <div className="article-meta">
           <Link href={`/categories/${article.category.slug}`} style={{ color: "#d97706" }}>
@@ -47,7 +64,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <span>•</span>
           <span>{article.readingTime} хв читання</span>
         </div>
-        
+
         <h1 className="article-title">{article.title}</h1>
         <p className="article-excerpt">{article.excerpt}</p>
 
@@ -66,7 +83,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       </header>
 
       {/* Article Content */}
-      <div 
+      <div
         className="article-content"
         dangerouslySetInnerHTML={{ __html: article.content }}
       />
@@ -74,7 +91,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       {/* Tags */}
       {article.tags.length > 0 && (
         <div className="article-tags">
-          {article.tags.map(tag => (
+          {article.tags.map((tag) => (
             <Link key={tag.id} href={`/tags/${tag.slug}`} className="tag-badge">
               #{tag.name}
             </Link>
@@ -82,12 +99,15 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         </div>
       )}
 
-      {/* Author Block - E-E-A-T */}
-      <AuthorBlock 
+      {/* Author Block — E-E-A-T */}
+      <AuthorBlock
         author={article.author}
         publishedAt={article.publishedAt}
         updatedAt={article.updatedAt}
       />
+
+      {/* Related Articles — internal silo links */}
+      <RelatedArticles articles={relatedArticles} />
     </article>
   );
 }

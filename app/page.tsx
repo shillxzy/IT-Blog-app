@@ -1,92 +1,98 @@
+// ============================================================
+// app/page.tsx — Public Blog Home (Silo Hub — Level 0)
+// ============================================================
+
 import Link from "next/link";
-import { getArticles, getCategories, getAuthors, getTags } from "@/lib/api";
+import { getArticles, getCategories } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { FileText, FolderOpen, Tags, Users, Plus, Eye, Clock } from "lucide-react";
+import { Clock, ArrowRight } from "lucide-react";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "IT-Blog — блог для розробників",
+  description: "Останні статті, туторіали та найкращі практики для IT-спеціалістів.",
+};
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDashboard() {
-  const [articlesRes, categories, authors, tags] = await Promise.all([
-    getArticles({ limit: 5, status: "published" }),
+export default async function HomePage() {
+  const [categories, articlesRes] = await Promise.all([
     getCategories(),
-    getAuthors(),
-    getTags(),
+    getArticles({ limit: 10, status: "published" }),
   ]);
 
-  const recentArticles = articlesRes.data;
-  const totalArticles = articlesRes.meta.total;
-
-  const stats = [
-    { label: "Статті", value: totalArticles, icon: FileText, href: "/admin/articles" },
-    { label: "Категорії", value: categories.length, icon: FolderOpen, href: "/admin/categories" },
-    { label: "Теги", value: tags.length, icon: Tags, href: "/admin/tags" },
-    { label: "Автори", value: authors.length, icon: Users, href: "/admin/authors" },
-  ];
+  const latestArticles = articlesRes.data;
 
   return (
     <div>
-      <div className="dashboard-header">
-        <div>
-          <h1 className="dashboard-title">Дашборд</h1>
-          <p className="dashboard-subtitle">Загальний огляд блогу</p>
-        </div>
-        <Link href="/admin/articles/new" className="btn-primary">
-          <Plus size={16} /> Нова стаття
-        </Link>
+      {/* Hero */}
+      <div className="home-hero">
+        <h1 className="home-hero-title">IT-Blog</h1>
+        <p className="home-hero-subtitle">
+          Блог для розробників: статті, туторіали та найкращі практики з різних напрямків IT.
+        </p>
       </div>
 
-      {/* Stats */}
-      <div className="stats-grid">
-        {stats.map(({ label, value, icon: Icon, href }) => (
-          <Link key={label} href={href} className="stat-card">
-            <div className="stat-icon" style={{ background: "#f5f5f4", color: "#44403c" }}>
-              <Icon size={20} />
-            </div>
-            <p className="stat-value">{value}</p>
-            <p className="stat-label">{label}</p>
+      {/* Silo Grid — Category Pillars (Level 1) */}
+      <h2 className="home-section-title">Тематичні розділи</h2>
+      <div className="silo-grid">
+        {categories.map((category) => (
+          <Link
+            key={category.id}
+            href={`/categories/${category.slug}`}
+            className="silo-card"
+            style={{ borderTop: `4px solid ${category.color || "#d6d3d1"}` }}
+          >
+            <p className="silo-card-title">{category.name}</p>
+            <p className="silo-card-desc">{category.description}</p>
+            <span className="silo-card-count">
+              {category.articlesCount} {pluralArticles(category.articlesCount)}
+            </span>
           </Link>
         ))}
       </div>
 
-      {/* Recent articles */}
-      <div className="recent-articles-card">
-        <div className="recent-articles-header">
-          <h2>Останні статті</h2>
-          <Link href="/admin/articles" className="link-amber">Всі статті →</Link>
-        </div>
-
-        <div className="recent-articles-list">
-          {recentArticles.map((article) => (
-            <div key={article.id} className="recent-item">
-              <div className="recent-info">
-                <Link href={`/admin/articles/${article.id}/edit`} className="recent-title" style={{display: "block"}}>
-                  {article.title}
-                </Link>
-                <div className="recent-meta">
-                  <span>{article.category.name}</span>
-                  {article.publishedAt && (
-                    <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                      <Clock size={10} />
-                      {formatDate(article.publishedAt)}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="recent-actions">
-                <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                  <Eye size={12} />
-                  {article.viewsCount.toLocaleString("uk-UA")}
-                </span>
-                <span className={`badge ${article.status === 'published' ? 'badge-success' : article.status === 'draft' ? 'badge-warning' : 'badge-neutral'}`}>
-                  {article.status === "published" ? "Опублікована" : article.status === "draft" ? "Чернетка" : "Архів"}
-                </span>
-                <Link href={`/admin/articles/${article.id}/edit`}>Редагувати</Link>
-              </div>
+      {/* Latest Articles (Level 2 links from hub) */}
+      <h2 className="home-section-title">Останні статті</h2>
+      <div className="latest-articles">
+        {latestArticles.map((article) => (
+          <div key={article.id} className="latest-article-item">
+            <Link
+              href={`/categories/${article.category.slug}`}
+              className="latest-article-category"
+              style={{ color: article.category.color || "#0369a1" }}
+            >
+              {article.category.name}
+            </Link>
+            <p className="latest-article-title">
+              <Link href={`/articles/${article.slug}`}>
+                {article.title}
+              </Link>
+            </p>
+            <p className="latest-article-excerpt">{article.excerpt}</p>
+            <div className="latest-article-meta">
+              {article.publishedAt && (
+                <time dateTime={article.publishedAt}>
+                  {formatDate(article.publishedAt)}
+                </time>
+              )}
+              <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <Clock size={12} /> {article.readingTime} хв
+              </span>
+              <span>👁 {article.viewsCount.toLocaleString("uk-UA")}</span>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
+}
+
+function pluralArticles(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod100 >= 11 && mod100 <= 14) return "статей";
+  if (mod10 === 1) return "стаття";
+  if (mod10 >= 2 && mod10 <= 4) return "статті";
+  return "статей";
 }

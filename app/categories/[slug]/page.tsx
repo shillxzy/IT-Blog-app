@@ -1,19 +1,18 @@
 // ============================================================
-// app/categories/[slug]/page.tsx — Category listing page (ISR)
+// app/categories/[slug]/page.tsx — Category Silo Page (Level 1)
 // ============================================================
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import { Suspense } from "react";
+import Link from "next/link";
 import {
   getCategoryBySlug,
   getArticles,
   getAllCategorySlugs,
 } from "@/lib/api";
-import { absoluteUrl } from "@/lib/utils";
-import { ArticleCardComponent } from "@/components/blog/ArticleCardComponent";
-import { Pagination } from "@/components/ui/Pagination";
+import { absoluteUrl, formatDate } from "@/lib/utils";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { Clock } from "lucide-react";
 
 export const revalidate = 300;
 
@@ -39,15 +38,9 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${category.name} — YourBlog`,
+    title: `${category.name} — IT-Blog`,
     description: category.description,
     alternates: { canonical: absoluteUrl(`/categories/${slug}`) },
-    openGraph: {
-      title: category.name,
-      description: category.description,
-      type: "website",
-      images: category.cover ? [{ url: category.cover, width: 1200, height: 630, alt: category.name }] : [],
-    },
   };
 }
 
@@ -74,66 +67,77 @@ export default async function CategoryPage({
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Category header */}
-      <header className="mb-10">
-        {category.cover && (
-          <div className="relative h-48 rounded-2xl overflow-hidden mb-6">
-            <Image
-              src={category.cover}
-              alt={category.name}
-              fill
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          </div>
-        )}
+    <div>
+      {/* Breadcrumb — silo navigation */}
+      <Breadcrumbs items={[{ label: category.name }]} />
 
-        <div className="flex items-center gap-3 mb-2">
+      {/* Category header */}
+      <section style={{ marginBottom: "2rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
           {category.color && (
             <span
-              className="w-3 h-3 rounded-full flex-shrink-0"
-              style={{ backgroundColor: category.color }}
+              style={{
+                width: "12px",
+                height: "12px",
+                borderRadius: "50%",
+                backgroundColor: category.color,
+                flexShrink: 0,
+              }}
               aria-hidden
             />
           )}
-          <p className="text-sm font-semibold text-stone-400 uppercase tracking-widest">
+          <span style={{ fontSize: "0.8rem", color: "#a8a29e", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em" }}>
             Категорія
-          </p>
+          </span>
         </div>
-
-        <h1 className="font-display text-4xl font-bold text-stone-900 mb-3">
-          {category.name}
-        </h1>
-
+        <h1>{category.name}</h1>
         {category.description && (
-          <p className="text-stone-500 text-lg max-w-2xl leading-relaxed">
-            {category.description}
-          </p>
+          <p style={{ fontSize: "1.1rem", color: "#57534e" }}>{category.description}</p>
         )}
-
-        <p className="text-sm text-stone-400 mt-3">
+        <p style={{ fontSize: "0.85rem", color: "#a8a29e", margin: 0 }}>
           {category.articlesCount} {pluralArticles(category.articlesCount)}
         </p>
-      </header>
+      </section>
 
-      {/* Articles */}
+      {/* Articles — contextual links within silo */}
       {articles.length === 0 ? (
-        <div className="text-center py-24 text-stone-400">
-          <p>У цій категорії ще немає статей</p>
-        </div>
+        <section>
+          <p>У цій категорії ще немає статей.</p>
+        </section>
       ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article) => (
-              <ArticleCardComponent key={article.id} article={article} />
-            ))}
-          </div>
-          <Suspense>
-            <Pagination meta={meta} />
-          </Suspense>
-        </>
+        <div className="latest-articles">
+          {articles.map((article) => (
+            <div key={article.id} className="latest-article-item">
+              <p className="latest-article-title">
+                <Link href={`/articles/${article.slug}`}>
+                  {article.title}
+                </Link>
+              </p>
+              <p className="latest-article-excerpt">{article.excerpt}</p>
+              <div className="latest-article-meta">
+                {article.publishedAt && (
+                  <time dateTime={article.publishedAt}>
+                    {formatDate(article.publishedAt)}
+                  </time>
+                )}
+                <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  <Clock size={12} /> {article.readingTime} хв
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {meta.totalPages > 1 && (
+        <nav aria-label="Pagination" style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1.5rem", padding: "0.75rem" }}>
+          {meta.hasPrev && <Link href={`/categories/${slug}?page=${page - 1}`}>← Назад</Link>}
+          <span style={{ fontSize: "0.875rem", color: "#78716c" }}>
+            Сторінка {meta.page} з {meta.totalPages}
+          </span>
+          {meta.hasNext && <Link href={`/categories/${slug}?page=${page + 1}`}>Далі →</Link>}
+        </nav>
       )}
     </div>
   );
