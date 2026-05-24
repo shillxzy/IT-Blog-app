@@ -3,11 +3,11 @@
 
 -- ── Категорії ─────────────────────────────────────────────
 INSERT INTO categories (name, slug, description, color, cover_url) VALUES
-('Frontend',    'frontend',    'React, Next.js, TypeScript і сучасний веб.',              '#0ea5e9', 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&q=80'),
-('Productivity','productivity','Практики для ефективної роботи і фокусу.',                '#f59e0b', 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&q=80'),
-('Backend',     'backend',     'Node.js, бази даних, API та серверна розробка.',          '#10b981', 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&q=80'),
-('DevOps',      'devops',      'CI/CD, Docker, хмарні платформи та автоматизація.',      '#8b5cf6', 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=1200&q=80'),
-('AI & ML',     'ai',          'Штучний інтелект, машинне навчання та LLM.',              '#ec4899', 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&q=80')
+('Frontend',    'frontend',    'JavaScript, TypeScript, React та Next.js — сучасний frontend від основ до продакшн-практик.',  '#0ea5e9', 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&q=80'),
+('Productivity','productivity','Інструменти, техніки фокусу та кар''єрний розвиток для IT-спеціалістів.',                       '#f59e0b', 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&q=80'),
+('Backend',     'backend',     'Node.js, Express, REST API та PostgreSQL — побудова серверних застосунків з нуля.',             '#10b981', 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&q=80'),
+('DevOps',      'devops',      'Docker, CI/CD та GitHub Actions — автоматизація розгортання і підтримка інфраструктури.',       '#8b5cf6', 'https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=1200&q=80'),
+('AI & ML',     'ai',          'LLM API, RAG-архітектура та векторні бази даних — AI для практикуючих розробників.',           '#ec4899', 'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&q=80')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ── Автори (пароль: password123 → bcrypt хеш) ─────────────
