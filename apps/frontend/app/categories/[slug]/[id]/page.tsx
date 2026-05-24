@@ -7,8 +7,12 @@ import { AuthorCard } from "@/components/blog/AuthorCard";
 import { RelatedArticles } from "@/components/blog/RelatedArticles";
 import { TagBadge } from "@/components/ui/TagBadge";
 import { ViewCounter } from "@/components/ui/ViewCounter";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { ArticleSchema, BreadcrumbSchema } from "@/components/seo/StructuredData";
 import { formatDate } from "@/lib/utils";
 import { Clock, Calendar } from "lucide-react";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://yourblog.com";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string; id: string }>;
@@ -17,12 +21,14 @@ interface ArticlePageProps {
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { slug, id } = await params;
   try {
     const article = await getArticleBySlug(id);
+    const canonicalUrl = `${SITE_URL}/categories/${slug}/${id}`;
     return {
       title: article.metaTitle ?? article.title,
       description: article.metaDescription ?? article.excerpt,
+      alternates: { canonical: canonicalUrl },
       openGraph: {
         title: article.metaTitle ?? article.title,
         description: article.metaDescription ?? article.excerpt,
@@ -30,6 +36,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
         type: "article",
         publishedTime: article.publishedAt ?? undefined,
         authors: [article.author.name],
+        url: canonicalUrl,
       },
     };
   } catch {
@@ -38,7 +45,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const { id } = await params;
+  const { slug, id } = await params;
 
   let article;
   try {
@@ -49,92 +56,123 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const related = await getRelatedArticles(article.slug).catch(() => []);
 
+  const articleUrl = `${SITE_URL}/categories/${slug}/${id}`;
+  const breadcrumbItems = [
+    { name: "Головна", url: `${SITE_URL}/` },
+    { name: article.category.name, url: `${SITE_URL}/categories/${slug}` },
+    { name: article.title, url: articleUrl },
+  ];
+
   return (
-    <div className="article-layout">
-      <article className="article-main">
-        <header className="article-header">
-          <div className="article-meta-top">
-            <Link
-              href={`/categories/${article.category.slug}`}
-              className="article-category-badge"
-              style={{
-                backgroundColor: `${article.category.color ?? "#57534e"}22`,
-                color: article.category.color ?? "#57534e",
-              }}
-            >
-              {article.category.name}
-            </Link>
-            <span className="article-reading-time">
-              <Clock size={13} />
-              {article.readingTime} хв читання
-            </span>
-          </div>
+    <>
+      <ArticleSchema
+        title={article.metaTitle ?? article.title}
+        description={article.metaDescription ?? article.excerpt ?? ""}
+        url={articleUrl}
+        imageUrl={article.cover ?? undefined}
+        authorName={article.author.name}
+        publishedAt={article.publishedAt ?? article.createdAt}
+        updatedAt={article.updatedAt}
+        categoryName={article.category.name}
+        siteUrl={SITE_URL}
+        siteName="IT Blog"
+      />
+      <BreadcrumbSchema items={breadcrumbItems} />
 
-          <h1 className="article-title">{article.title}</h1>
-          <p className="article-excerpt">{article.excerpt}</p>
+      <Breadcrumb
+        items={[
+          { name: "Головна", href: "/" },
+          { name: article.category.name, href: `/categories/${slug}` },
+          { name: article.title, href: `/categories/${slug}/${id}` },
+        ]}
+      />
 
-          <div className="article-meta-bottom">
-            <Link href={`/authors/${article.author.slug}`} className="article-author-link">
-              {article.author.avatar && (
-                <Image
-                  src={article.author.avatar}
-                  alt={article.author.name}
-                  width={36}
-                  height={36}
-                  className="rounded-full"
-                />
-              )}
-              <span>{article.author.name}</span>
-            </Link>
-            {article.publishedAt && (
-              <span className="article-date">
-                <Calendar size={13} />
-                {formatDate(article.publishedAt)}
+      <div className="article-layout">
+        <article className="article-main">
+          <header className="article-header">
+            <div className="article-meta-top">
+              <Link
+                href={`/categories/${article.category.slug}`}
+                className="article-category-badge"
+                style={{
+                  backgroundColor: `${article.category.color ?? "#57534e"}22`,
+                  color: article.category.color ?? "#57534e",
+                }}
+              >
+                {article.category.name}
+              </Link>
+              <span className="article-reading-time">
+                <Clock size={13} />
+                {article.readingTime} хв читання
               </span>
-            )}
-            <ViewCounter slug={article.slug} initialCount={article.viewsCount} />
+            </div>
+
+            <h1 className="article-title">{article.title}</h1>
+            <p className="article-excerpt">{article.excerpt}</p>
+
+            <div className="article-meta-bottom">
+              <Link href={`/authors/${article.author.slug}`} className="article-author-link">
+                {article.author.avatar && (
+                  <Image
+                    src={article.author.avatar}
+                    alt={article.author.name}
+                    width={36}
+                    height={36}
+                    className="rounded-full"
+                  />
+                )}
+                <span>{article.author.name}</span>
+              </Link>
+              {article.publishedAt && (
+                <span className="article-date">
+                  <Calendar size={13} />
+                  {formatDate(article.publishedAt)}
+                </span>
+              )}
+              <ViewCounter slug={article.slug} initialCount={article.viewsCount} />
+            </div>
+          </header>
+
+          {article.cover && (
+            <div className="article-cover">
+              <Image
+                src={article.cover}
+                alt={article.title}
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 800px"
+              />
+            </div>
+          )}
+
+          <div
+            className="article-content prose"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
+
+          {article.tags.length > 0 && (
+            <div className="article-tags">
+              {article.tags.map((tag) => (
+                <TagBadge key={tag.id} tag={tag} />
+              ))}
+            </div>
+          )}
+
+          <div className="article-author-card">
+            <AuthorCard author={article.author} />
           </div>
-        </header>
+        </article>
 
-        {article.cover && (
-          <div className="article-cover">
-            <Image
-              src={article.cover}
-              alt={article.title}
-              fill
-              priority
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 800px"
-            />
-          </div>
-        )}
-
-        <div
-          className="article-content prose"
-          dangerouslySetInnerHTML={{ __html: article.content }}
-        />
-
-        {article.tags.length > 0 && (
-          <div className="article-tags">
-            {article.tags.map((tag) => (
-              <TagBadge key={tag.id} tag={tag} />
-            ))}
-          </div>
-        )}
-
-        <div className="article-author-card">
-          <AuthorCard author={article.author} />
-        </div>
-      </article>
-
-      <aside className="article-sidebar">
-        {related.length > 0 && (
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">Схожі статті</h3>
-            <RelatedArticles articles={related} />
-          </div>
-        )}
-      </aside>
-    </div>
+        <aside className="article-sidebar">
+          {related.length > 0 && (
+            <div className="sidebar-section">
+              <h3 className="sidebar-title">Схожі статті</h3>
+              <RelatedArticles articles={related} />
+            </div>
+          )}
+        </aside>
+      </div>
+    </>
   );
 }

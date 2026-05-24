@@ -31,12 +31,14 @@ const authors = [
   }
 ];
 
+// Silo structure: each category is a separate thematic silo.
+// Descriptions match semantic core head keywords for that silo.
 const categories = [
   {
     id: "c1",
     slug: "frontend",
     name: "Frontend",
-    description: "React, Next.js, TypeScript і сучасний веб.",
+    description: "JavaScript, TypeScript, React та Next.js — сучасний frontend від основ до продакшн-практик.",
     color: "#0ea5e9",
     cover: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&q=80",
     articlesCount: 2,
@@ -47,7 +49,7 @@ const categories = [
     id: "c2",
     slug: "productivity",
     name: "Productivity",
-    description: "Практики для ефективної роботи і фокусу.",
+    description: "Інструменти, техніки фокусу та кар'єрний розвиток для IT-спеціалістів.",
     color: "#f59e0b",
     cover: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1200&q=80",
     articlesCount: 2,
@@ -58,7 +60,7 @@ const categories = [
     id: "c3",
     slug: "backend",
     name: "Backend",
-    description: "Node.js, бази даних, API та серверна розробка.",
+    description: "Node.js, Express, REST API та PostgreSQL — побудова серверних застосунків з нуля.",
     color: "#10b981",
     cover: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1200&q=80",
     articlesCount: 2,
@@ -69,7 +71,7 @@ const categories = [
     id: "c4",
     slug: "devops",
     name: "DevOps",
-    description: "CI/CD, Docker, хмарні платформи та автоматизація.",
+    description: "Docker, CI/CD та GitHub Actions — автоматизація розгортання і підтримка інфраструктури.",
     color: "#8b5cf6",
     cover: "https://images.unsplash.com/photo-1667372393119-3d4c48d07fc9?w=1200&q=80",
     articlesCount: 2,
@@ -80,7 +82,7 @@ const categories = [
     id: "c5",
     slug: "ai",
     name: "AI & ML",
-    description: "Штучний інтелект, машинне навчання та LLM.",
+    description: "LLM API, RAG-архітектура та векторні бази даних — AI для практикуючих розробників.",
     color: "#ec4899",
     cover: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1200&q=80",
     articlesCount: 2,
