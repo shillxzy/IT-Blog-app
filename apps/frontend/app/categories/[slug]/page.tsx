@@ -4,6 +4,10 @@ import { notFound } from "next/navigation";
 import { getCategoryBySlug, getCategoryArticles } from "@/lib/api";
 import { ArticleCardComponent } from "@/components/blog/ArticleCardComponent";
 import { Pagination } from "@/components/ui/Pagination";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { BreadcrumbSchema } from "@/components/seo/StructuredData";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://yourblog.com";
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>;
@@ -16,7 +20,16 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const { slug } = await params;
   try {
     const category = await getCategoryBySlug(slug);
-    return { title: category.name, description: category.description };
+    return {
+      title: category.name,
+      description: category.description,
+      alternates: { canonical: `${SITE_URL}/categories/${slug}` },
+      openGraph: {
+        title: `${category.name} | IT Blog`,
+        description: category.description ?? undefined,
+        url: `${SITE_URL}/categories/${slug}`,
+      },
+    };
   } catch {
     return { title: "Категорія" };
   }
@@ -39,12 +52,31 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     meta: { page: 1, limit: 10, total: 0, totalPages: 0, hasNext: false, hasPrev: false },
   }));
 
+  const breadcrumbItems = [
+    { name: "Головна", url: `${SITE_URL}/` },
+    { name: category.name, url: `${SITE_URL}/categories/${slug}` },
+  ];
+
   return (
-    <div>
+    <>
+      <BreadcrumbSchema items={breadcrumbItems} />
+
+      <Breadcrumb
+        items={[
+          { name: "Головна", href: "/" },
+          { name: category.name, href: `/categories/${slug}` },
+        ]}
+      />
+
       <div className="category-header">
-        <div className="category-header-accent" style={{ backgroundColor: category.color ?? "#57534e" }} />
+        <div
+          className="category-header-accent"
+          style={{ backgroundColor: category.color ?? "#57534e" }}
+        />
         <h1 className="category-title">{category.name}</h1>
-        {category.description && <p className="category-description">{category.description}</p>}
+        {category.description && (
+          <p className="category-description">{category.description}</p>
+        )}
         <p className="category-count">{category.articlesCount} статей</p>
       </div>
 
@@ -58,6 +90,6 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         </div>
       )}
       <Pagination meta={articlesRes.meta} />
-    </div>
+    </>
   );
 }
